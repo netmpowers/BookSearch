@@ -1,0 +1,32 @@
+pip install keyring
+
+
+uses:
+gui.py
+======
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+from datetime import datetime
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+import time
+import webbrowser
+import smtplib
+import sqlite3
+import json
+import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+BookSearch.py
+=============
+import argparse
+import os
+
+database_operations.py
+======================
+import sqlite3
+
+DATABASE = 'bin/BookSearch.db'
