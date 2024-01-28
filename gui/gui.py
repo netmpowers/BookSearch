@@ -128,6 +128,12 @@ def get_url_data(conn, url, search_id, search_string):
             # Creating a DataFrame using pandas
             columns = ['Column1', 'ItemIndex', 'Subject', 'Size', 'Parts', 'Poster', 'ItemGroup', 'Age']
             df = pd.DataFrame(data, columns=columns)
+            
+            # Filter rows based on the 'ItemGroup' column
+            df = df[~df['ItemGroup'].str.contains('german|dutch', case=False, na=False)]
+
+            # Reset the index of the DataFrame after filtering
+            df.reset_index(drop=True, inplace=True)
         except Exception as e:
             print("Error reading HTML:", e)
 
