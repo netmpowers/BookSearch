@@ -3,3 +3,4 @@ bin/BookSearch.db
 error_log.txt
 output_log.txt
 BookSearch-workspace.code-workspace
+*.pyc
