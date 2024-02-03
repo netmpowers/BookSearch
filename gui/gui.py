@@ -87,22 +87,53 @@ def refresh_found_treeview(conn, search_id, found_treeview):
 
 def get_url_data(conn, url, search_id, search_string):
     # Compare the website data to the database
+    data = []
     delta_list = []
     items_to_delete = []
     response = requests.get(url)
     html = response.text
     soup = BeautifulSoup(html, 'html.parser')
-    search_table = soup.find("table", class_="xMenuT")
+    search_table = soup.find('table', {'class': 'border text-left border-black my-2 w-full table-fixed result-table'})
     if search_table:
         # Wrap the HTML string in a StringIO object
-        html_string = str(search_table)
-
+        rows = search_table.find_all('tr')
         try:
-            df = pd.read_html(html_string, header=0, flavor='lxml')[0]
-            df = df.drop(columns=['Unnamed: 1'])  # Drop the check box
-            df = df.rename(columns={'Unnamed: 0': 'ItemIndex'})
-            df = df.rename(columns={'Group': 'ItemGroup'})
-            df['Subject'] = df['Subject'].str.strip()
+            for row in rows[1:]:  # Skip the header row
+                columns = row.find_all('td')
+
+                # Extracting data from the second div class within the row
+                anchor_tag = columns[2].find('a')
+
+                # Extracting title and other data from the columns as needed
+                title = anchor_tag.text.strip()
+
+                # Extracting additional information from the div with class 'flex-row'
+                flex_row_div = columns[2].find('div', {'class': 'flex-row'})
+                size = flex_row_div.find('span', {'class': 'rounded-lg px-2 border-gray-300 border bg-white'}).text.strip()
+                
+                # Check if the 'complete' span exists before accessing its text
+                parts_span = flex_row_div.find('span', {'class': 'rounded-lg px-2 border-gray-300 border complete bg-gray-100'})
+                parts = parts_span.text.strip() if parts_span else ''
+
+                email = flex_row_div.find('span', {'class': 'rounded-lg px-2 border-gray-300 border bg-blue-100'}).text.strip()
+                groups = flex_row_div.find('span', {'class': 'rounded-lg px-2 border-gray-300 border bg-gray-100'}).text.strip()
+
+                col1_data = columns[0].text.strip()
+                col2_data = columns[1].text.strip()
+                col4_data = columns[3].text.strip()
+
+                # Append the extracted data to the list
+                data.append([col1_data, col2_data, title, size, parts, email, groups, col4_data])
+
+            # Creating a DataFrame using pandas
+            columns = ['Column1', 'ItemIndex', 'Subject', 'Size', 'Parts', 'Poster', 'ItemGroup', 'Age']
+            df = pd.DataFrame(data, columns=columns)
+            
+            # Filter rows based on the 'ItemGroup' column
+            df = df[~df['ItemGroup'].str.contains('german|dutch', case=False, na=False)]
+
+            # Reset the index of the DataFrame after filtering
+            df.reset_index(drop=True, inplace=True)
         except Exception as e:
             print("Error reading HTML:", e)
 
